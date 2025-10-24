@@ -4,13 +4,16 @@ import replicate
 from PIL import Image
 import io
 import base64
-import requests
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-# Add your Replicate API Token
-replicate.Client(api_token="YOUR_REPLICATE_API_KEY")
+# ✅ OPTION 1: Direct key likh do yahan (testing ke liye)
+# replicate_client = replicate.Client(api_token="r8_DOwlKCWvIdBw0SSEodRaV8Smqvi5jcQ00TLA0")
+
+# ✅ OPTION 2: Production ke liye environment variable use karo
+replicate_client = replicate.Client(api_token=os.getenv("REPLICATE_API_TOKEN"))
 
 @app.route("/remove-bg", methods=["POST"])
 def remove_bg():
@@ -18,12 +21,12 @@ def remove_bg():
     image_data = data.get("image")
     image_bytes = base64.b64decode(image_data.split(",")[1])
 
-    # Background removal model
-    output = replicate.run(
+    output = replicate_client.run(
         "cjwbw/rembg:1.0.1",
         input={"image": image_bytes}
     )
     return jsonify({"result": output})
+
 
 @app.route("/upscale", methods=["POST"])
 def upscale():
@@ -31,15 +34,12 @@ def upscale():
     image_data = data.get("image")
     image_bytes = base64.b64decode(image_data.split(",")[1])
 
-    # 4K upscale model
-    output = replicate.run(
+    output = replicate_client.run(
         "nightmareai/real-esrgan:latest",
-        input={
-            "image": image_bytes,
-            "scale": 4
-        }
+        input={"image": image_bytes, "scale": 4}
     )
     return jsonify({"result": output})
+
 
 @app.route("/resize-passport", methods=["POST"])
 def resize_passport():
@@ -48,7 +48,6 @@ def resize_passport():
     image_bytes = base64.b64decode(image_data.split(",")[1])
     image = Image.open(io.BytesIO(image_bytes))
 
-    # Passport photo standard size = 2x2 inches at 300 DPI
     target_size = (600, 600)
     image = image.resize(target_size)
     buffered = io.BytesIO()
