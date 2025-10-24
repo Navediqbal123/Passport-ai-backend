@@ -15,6 +15,10 @@ CORS(app)
 # ✅ OPTION 2: Production ke liye environment variable use karo
 replicate_client = replicate.Client(api_token=os.getenv("REPLICATE_API_TOKEN"))
 
+@app.route("/")
+def home():
+    return "✅ Passport AI Backend is running successfully!"
+
 @app.route("/remove-bg", methods=["POST"])
 def remove_bg():
     data = request.json
