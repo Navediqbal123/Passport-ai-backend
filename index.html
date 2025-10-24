@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Passport Photo 4K Generator</title>
+  <style>
+    body { background:#0b0b0b; color:white; font-family:sans-serif; text-align:center; }
+    input, button { margin:10px; padding:10px; border-radius:8px; border:none; }
+    button { background:#4f46e5; color:white; cursor:pointer; }
+    img { margin-top:20px; width:200px; border-radius:12px; }
+  </style>
+</head>
+<body>
+  <h2>📸 Passport Photo Generator (Ultra 4K)</h2>
+  <input type="file" id="imageInput" accept="image/*"><br>
+  <button onclick="removeBG()">Remove Background</button>
+  <button onclick="upscale4K()">Upscale to 4K</button>
+  <button onclick="resizePassport()">Resize to Passport Size</button>
+
+  <div><img id="output" src="" alt=""></div>
+
+  <script>
+    const backend = "https://your-backend-url.onrender.com"; // 👈 Replace with your Render URL
+    let uploadedImage = "";
+
+    document.getElementById("imageInput").addEventListener("change", (e) => {
+      const reader = new FileReader();
+      reader.onload = () => { uploadedImage = reader.result; };
+      reader.readAsDataURL(e.target.files[0]);
+    });
+
+    async function removeBG() {
+      const res = await fetch(`${backend}/remove-bg`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({image: uploadedImage})
+      });
+      const data = await res.json();
+      document.getElementById("output").src = data.result;
+    }
+
+    async function upscale4K() {
+      const res = await fetch(`${backend}/upscale`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({image: uploadedImage})
+      });
+      const data = await res.json();
+      document.getElementById("output").src = data.result;
+    }
+
+    async function resizePassport() {
+      const res = await fetch(`${backend}/resize-passport`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({image: uploadedImage})
+      });
+      const data = await res.json();
+      document.getElementById("output").src = data.result;
+    }
+  </script>
+</body>
+</html>
